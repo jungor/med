@@ -1,0 +1,10 @@
+#md-previewer {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    box-sizing: border-box;
+    padding: 0 1em;
+    width: 50% !important;
+    height: 100vh !important;
+    overflow: scroll;
+}
