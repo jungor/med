@@ -3,12 +3,23 @@
  */
 
 import React from 'react';
-// import AceEditor from 'react-ace';
 import './MDEditor.scss'
 
 const { PropTypes } = React;
 
 export default class MDEditor extends React.Component {
+
+  static proTypes = {
+    name: PropTypes.string,
+    cols: PropTypes.string,
+    rows: PropTypes.string,
+    value: PropTypes.string
+  };
+
+  static defaultProps = {
+    cols: '80',
+    rows: '100'
+  };
 
   render() {
     return (
@@ -22,16 +33,3 @@ export default class MDEditor extends React.Component {
     );
   }
 }
-
-MDEditor.propTypes = {
-  name: PropTypes.string,
-  cols: PropTypes.string,
-  rows: PropTypes.string
-};
-
-MDEditor.defaultProps = {
-  name: 'MDEditor',
-  cols: '80',
-  rows: '100'
-};
-

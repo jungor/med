@@ -6,6 +6,9 @@ import marked from 'marked';
 import './MDPreviewer.scss';
 import 'highlight.js/styles/default.css';
 
+const { PropTypes } = React;
+
+
 marked.setOptions({
   highlight: function (code) {
     return require('highlight.js').highlightAuto(code).value;
@@ -13,6 +16,11 @@ marked.setOptions({
 });
 
 class MDPreviewer extends React.Component {
+
+  static proTypes = {
+    name: PropTypes.string,
+    dangerouslySetInnerHTML: PropTypes.obj,
+  }
 
   render() {
     return (

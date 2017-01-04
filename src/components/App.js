@@ -1,7 +1,7 @@
 import React from 'react';
 import MDEditor from './MDEditor';
 import MDPreviewer from './MDPreviewer';
-import { autoBindThis } from '../utils';
+// import { autoBindThis } from '../utils';
 import './App.scss';
 
 
@@ -13,19 +13,16 @@ class AppComponent extends React.Component {
     this.state = {
       mdstr
     };
-    autoBindThis([
-      this.updateMdstr
-    ], this);
   }
 
 
-  updateMdstr(e) {
+  updateMdstr = (e) => {
     let mdstr = e.target.value;
     localStorage.setItem('mdstr', mdstr);
     this.setState({
       mdstr
     });
-  }
+  };
 
   render() {
     return (
@@ -42,11 +39,8 @@ class AppComponent extends React.Component {
           mdstr={this.state.mdstr}
         />
       </div>
-
     );
   }
 }
-
-AppComponent.defaultProps = {};
 
 export default AppComponent;
