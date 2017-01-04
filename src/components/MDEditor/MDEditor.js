@@ -10,23 +10,13 @@ const { PropTypes } = React;
 
 export default class MDEditor extends React.Component {
 
-  // shouldComponentUpdate() {
-  //   return false;
-  // }
-
   render() {
     return (
-      // <AceEditor
-      //   name={this.props.name}
-      //   mode={this.props.mode}
-      //   theme={this.props.mode}
-      //   fontSize={this.props.fontSize}
-      //   onChange={this.props.onChange}
-      // />
       <textarea
         id={this.props.name}
         cols={this.props.cols}
         rows={this.props.rows}
+        value={this.props.value}
         onChange={this.props.onChange}
       />
     );

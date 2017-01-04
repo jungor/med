@@ -5,4 +5,7 @@
     box-sizing: border-box;
     width: 50% !important;
     height: 100vh !important;
+    &:focus {
+        outline: none;
+    }
 }

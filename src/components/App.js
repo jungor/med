@@ -1,5 +1,4 @@
 import React from 'react';
-import marked from 'marked';
 import MDEditor from './MDEditor';
 import MDPreviewer from './MDPreviewer';
 import { autoBindThis } from '../utils';
@@ -10,21 +9,21 @@ class AppComponent extends React.Component {
 
   constructor(props) {
     super(props);
+    let mdstr = localStorage.getItem('mdstr') || '';
     this.state = {
-      html: ''
+      mdstr
     };
     autoBindThis([
-      this.mdtext2html
+      this.updateMdstr
     ], this);
   }
 
-  mdtext2html(e) {
-    let mdtext = e.target.value;
-    console.log(mdtext);
-    let html =  marked(mdtext);
-    console.log(html);
+
+  updateMdstr(e) {
+    let mdstr = e.target.value;
+    localStorage.setItem('mdstr', mdstr);
     this.setState({
-      html
+      mdstr
     });
   }
 
@@ -35,11 +34,12 @@ class AppComponent extends React.Component {
           name="md-editor"
           cols="40"
           rows="30"
-          onChange={this.mdtext2html}
+          value={this.state.mdstr}
+          onChange={this.updateMdstr}
         />
         <MDPreviewer
           name="md-previewer"
-          html={this.state.html}
+          mdstr={this.state.mdstr}
         />
       </div>
 
