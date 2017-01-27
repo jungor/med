@@ -1,11 +1,18 @@
 #md-editor {
     position: absolute;
     left: 0;
-    right: 0;
+    top: 0;
     box-sizing: border-box;
     width: 50% !important;
     height: 100vh !important;
-    &:focus {
-        outline: none;
+    textarea {
+        box-sizing: border-box;
+        border: none;
+        width: 100%;
+        min-height: 100%;
+        padding: 1em;
+        &:focus {
+            outline: none;
+        }
     }
 }

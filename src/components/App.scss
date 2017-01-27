@@ -7,6 +7,17 @@ body {
 
 .app-wrapper {
     position: relative;
-    width: 100%;
+    width: 100vw;
+    height: 100vh;
     //overflow: hidden;
+}
+
+.v-divider {
+    position: absolute;
+    width: 2px;
+    background: #9ad9ff;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    margin: auto;
 }
