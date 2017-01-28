@@ -6,8 +6,6 @@ import marked from 'marked';
 import './MDPreviewer.scss';
 import 'highlight.js/styles/default.css';
 import Ps from 'perfect-scrollbar';
-import 'perfect-scrollbar/dist/css/perfect-scrollbar.min.css'
-
 
 const { PropTypes } = React;
 
@@ -25,17 +23,13 @@ class MDPreviewer extends React.Component {
   };
 
   componentDidMount() {
-    Ps.initialize(this.rootDOM);
+    Ps.initialize(this.rootDOM, {theme: 'med'});
+    this.props.addSyncScrollElement(this.rootDOM);
   }
 
   componentWillUnmount() {
     Ps.destroy(this.rootDOM);
-  }
-
-  componentDidUpdate() {
-    Ps.update(this.rootDOM);
-    if (this.props.lastScrolled == 1) return;
-    this.rootDOM.scrollTop = this.props.scrollTopRate * this.rootDOM.scrollHeight / 100;
+    this.props.removeSyncScrollElement(this.rootDOM);
   }
 
   render() {
@@ -44,7 +38,7 @@ class MDPreviewer extends React.Component {
         ref={(rootDOM)=>{this.rootDOM = rootDOM;}}
         id={this.props.name}
         dangerouslySetInnerHTML={{__html: marked(this.props.MDStr)}}
-        onScroll={this.props.onScroll}
+        onScroll={this.props.onScroll.bind(undefined, this.rootDOM)}
       />
     );
   }

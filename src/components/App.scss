@@ -1,3 +1,5 @@
+@import "~perfect-scrollbar/src/css/main";
+
 body {
     margin: 0;
     padding: 0;
@@ -20,4 +22,14 @@ body {
     top: 0;
     bottom: 0;
     margin: auto;
+}
+
+/**
+   自定义ps滚动条的样式
+ */
+.ps-theme-med {
+    @include ps-container(map-merge($ps-theme-default, (
+        rail-default-opacity: $ps-rail-hover-opacity,    // 使滚动条始终显示。默认hover才显示
+        scrollbar-y-width: $ps-scrollbar-y-hover-width,  // 使滚动条不hover与hover一样大
+    )));
 }

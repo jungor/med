@@ -1,32 +1,54 @@
 import React from 'react';
 import MDEditor from './MDEditor';
 import MDPreviewer from './MDPreviewer';
+import Ps from 'perfect-scrollbar';
 // import { autoBindThis } from '../utils';
 import './App.scss';
 
-
 /**
  * 利用requestAnimationFrame来节流，用CustomEvent来创建节流后优化的事件
+ * @param type               要节流的事件名
+ * @param name               新事件名
+ * @param obj                监听对象
+ * @return {unThrottle}      取消节流
  */
-(function() {
-  let throttle = function(type, name, obj) {
-    obj = obj || window;
-    let running = false;
-    let func = function() {
-      if (running) { return; }
-      running = true;
-      requestAnimationFrame(function() {
-        obj.dispatchEvent(new CustomEvent(name));
-        running = false;
-      });
-    };
-    obj.addEventListener(type, func);
+function throttleNativeEvent(type, name, obj) {
+  obj = obj || window;
+  let running = false;
+  let func = function() {
+    if (running) { return; }
+    running = true;
+    requestAnimationFrame(function() {
+      obj.dispatchEvent(new CustomEvent(name));
+      running = false;
+    });
   };
+  obj.addEventListener(type, func);
+  function unThrottle() {
+    obj.removeEventListener(type, func);
+  }
+  return unThrottle;
+}
 
-  /* init - you can init any event */
-  throttle("resize", "optimizedResize");
-  throttle("scroll", "optimizedScroll");
-})();
+/**
+ * RAF版本函数节流
+ * @param fn
+ * @return {Function}
+ */
+function throttleWithRAF(fn) {
+  let hadRequested = false;
+  function throttledFn() {
+    if (!hadRequested) {
+      requestAnimationFrame(()=>{
+        fn.apply(undefined, arguments);
+        hadRequested = false;
+      });
+      hadRequested = true;
+    }
+  }
+  throttledFn.unThrottleFn = fn;
+  return throttledFn;
+}
 
 class AppComponent extends React.Component {
 
@@ -35,11 +57,10 @@ class AppComponent extends React.Component {
     let MDStr = localStorage.getItem('MDStr') || '';
     this.scrollTopRate = undefined; // 这里也有,是为了在scroll事件回调里面修改这个而不直接setState
     this.lastScrolled = undefined;
-    this.updateScrollBegin = false;
+    this.hadRequestedAF = false; // 是否已经调用了requestAnimationFrame
+    this.sycnScrollElements = [];
     this.state = {
-      MDStr,
-      scrollTopRate: undefined,  // scrollTop/scrollHeight
-      lastScrolled: undefined    // 0:editor 1:previewer
+      MDStr
     };
   }
 
@@ -53,34 +74,35 @@ class AppComponent extends React.Component {
   };
 
   updateScrollTopRate = (lastScrolled, e) => {
-    return;
-    console.log(e.nativeEvent);
-    let scrollTopRate = parseInt(e.target.scrollTop * 100 / e.target.scrollHeight);
-    // this.setState({
-    //   scrollTopRate,
-    //   lastScrolled
-    // })
-    this.scrollTopRate = scrollTopRate;
+    // 相关数据需要一直维护
+    this.scrollTopRate = e.target.scrollTop;
     this.lastScrolled = lastScrolled;
-    if (!this.updateScrollBegin) {
+    // dom更新只需每帧(16ms/f=1s/60fps)更新一次
+    if (!this.hadRequestedAF) {
+      // 类似设置了一个16ms的timeout，但是性能更好，不容易丢帧
       requestAnimationFrame(()=>{
-        this.setState({
-          scrollTopRate: this.scrollTopRate,
-          lastScrolled: this.lastScrolled
-        })
-      })
+        this.sycnScrollElements.forEach((element) => {
+          if (element == lastScrolled) return;
+          element.scrollTop = this.scrollTopRate;
+          Ps.update(element);
+        });
+        this.hadRequestedAF = false; // 重置flag使得下一帧可以发起请求
+      });
+      this.hadRequestedAF = true;    // 使得这个帧内不得再发起请求
     }
-    this.updateScrollBegin = true;
   };
 
-  tryUpdateScroll = () => {
-    if (!this.updateScrollBegin) {
-      requestAnimationFrame(()=>{
-        this.setState({
-            scrollTopRate: this.scrollTopRate,
-            lastScrolled: this.lastScrolled
-        })
-      })
+  addSyncScrollElement = (element) => {
+    let index  = this.sycnScrollElements.indexOf(element);
+    if (index < 0) {
+      this.sycnScrollElements.push(element);
+    }
+  };
+
+  removeSyncScrollElement = (element) => {
+    let index  = this.sycnScrollElements.indexOf(element);
+    if (index >= 0) {
+      this.sycnScrollElements.splice(index, 1);
     }
   };
 
@@ -94,8 +116,10 @@ class AppComponent extends React.Component {
           value={this.state.MDStr}
           scrollTopRate={this.state.scrollTopRate}
           lastScrolled={this.state.lastScrolled}
+          addSyncScrollElement={this.addSyncScrollElement}
+          removeSyncScrollElement={this.removeSyncScrollElement}
           onChange={this.updateMDStr}
-          onScroll={this.updateScrollTopRate.bind(this, 0)}
+          onScroll={this.updateScrollTopRate}
         />
         <div className="v-divider"></div>
         <MDPreviewer
@@ -103,7 +127,9 @@ class AppComponent extends React.Component {
           MDStr={this.state.MDStr}
           scrollTopRate={this.state.scrollTopRate}
           lastScrolled={this.state.lastScrolled}
-          onScroll={this.updateScrollTopRate.bind(this, 1)}
+          addSyncScrollElement={this.addSyncScrollElement}
+          removeSyncScrollElement={this.removeSyncScrollElement}
+          onScroll={this.updateScrollTopRate}
         />
       </div>
     );

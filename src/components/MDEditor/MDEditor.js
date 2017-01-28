@@ -3,9 +3,8 @@
  */
 
 import React from 'react';
-import './MDEditor.scss'
 import Ps from 'perfect-scrollbar';
-import 'perfect-scrollbar/dist/css/perfect-scrollbar.min.css'
+import './MDEditor.scss'
 
 const { PropTypes } = React;
 
@@ -25,21 +24,19 @@ export default class MDEditor extends React.Component {
 
   componentDidMount() {
     this.updateHeight();
-    Ps.initialize(this.rootDOM);
+    Ps.initialize(this.rootDOM, {theme: 'med'});
     window.addEventListener('resize', this.updateHeight);
+    this.props.addSyncScrollElement(this.rootDOM);
   }
 
   componentWillUnmount() {
     Ps.destroy(this.rootDOM);
     window.removeEventListener('resize', this.updateHeight);
-  }
-
-  componentDidUpdate() {
-    if (this.props.lastScrolled == 0) return;
-    this.rootDOM.scrollTop = this.props.scrollTopRate * this.rootDOM.scrollHeight / 100;
+    this.props.removeSyncScrollElement(this.rootDOM);
   }
 
   /**
+   * 使编辑器的高度随内容的增长而增长
    * 待优化：若resize窗口变大后又变小，scrollHeight会保持最大值。
    * @param e
    */
@@ -52,6 +49,7 @@ export default class MDEditor extends React.Component {
       <div
         ref={(rootDOM)=>{this.rootDOM = rootDOM;}}
         id={this.props.name}
+        onScroll={this.props.onScroll.bind(undefined, this.rootDOM)}
       >
         <textarea
           ref={(editor)=>{this.editor = editor;}}
@@ -65,7 +63,6 @@ export default class MDEditor extends React.Component {
             }
             this.props.onChange(e);
           }}
-          onScroll={this.props.onScroll}
         />
       </div>
     );
