@@ -4,6 +4,9 @@
 
 import React from 'react';
 import Ps from 'perfect-scrollbar';
+import CodeMirror from 'codemirror';
+import 'codemirror/mode/markdown/markdown';
+import 'codemirror/lib/codemirror.css';
 import './MDEditor.scss'
 
 const { PropTypes } = React;
@@ -24,13 +27,21 @@ export default class MDEditor extends React.Component {
 
   componentDidMount() {
     this.updateHeight();
+    this.cmEditor = CodeMirror.fromTextArea(this.editor, {
+      mode: 'markdown',
+      lineNumbers: true,
+      lineWrapping: true,
+      viewportMargin: Infinity
+    });
     Ps.initialize(this.rootDOM, {theme: 'med'});
+    this.cmEditor.on('change', this.updateMDStr);
     window.addEventListener('resize', this.updateHeight);
     this.props.addSyncScrollElement(this.rootDOM);
   }
 
   componentWillUnmount() {
     Ps.destroy(this.rootDOM);
+    this.off('change', this.updateMDStr);
     window.removeEventListener('resize', this.updateHeight);
     this.props.removeSyncScrollElement(this.rootDOM);
   }
@@ -44,6 +55,38 @@ export default class MDEditor extends React.Component {
     this.editor.style.height = this.editor.scrollHeight + 'px';
   };
 
+  updateMDStr = (instance, changeObj) => {
+    let newValue = this.cmEditor.getDoc().getValue();
+    this.props.updateMDStr(newValue);
+    if (this.rootDOM) {
+      Ps.update(this.rootDOM);
+    }
+  };
+
+  // render() {
+  //   return (
+  //     <div
+  //       ref={(rootDOM)=>{this.rootDOM = rootDOM;}}
+  //       id={this.props.name}
+  //       onScroll={this.props.onScroll.bind(undefined, this.rootDOM)}
+  //     >
+  //       <textarea
+  //         ref={(editor)=>{this.editor = editor;}}
+  //         value={this.props.value}
+  //         onChange={(e)=>{
+  //           if (this.editor) {
+  //             this.updateHeight(e);
+  //           }
+  //           if (this.rootDOM) {
+  //             Ps.update(this.rootDOM);
+  //           }
+  //           this.props.updateMDStr(e.target.value);
+  //         }}
+  //       />
+  //     </div>
+  //   );
+  // }
+
   render() {
     return (
       <div
@@ -54,15 +97,7 @@ export default class MDEditor extends React.Component {
         <textarea
           ref={(editor)=>{this.editor = editor;}}
           value={this.props.value}
-          onChange={(e)=>{
-            if (this.editor) {
-              this.updateHeight(e);
-            }
-            if (this.rootDOM) {
-              Ps.update(this.rootDOM);
-            }
-            this.props.onChange(e);
-          }}
+          readOnly="readOnly"
         />
       </div>
     );

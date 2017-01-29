@@ -5,7 +5,8 @@
     box-sizing: border-box;
     width: 50% !important;
     height: 100vh !important;
-    textarea {
+    padding-right: 1em;
+    >textarea {
         box-sizing: border-box;
         border: none;
         width: 100%;
@@ -15,4 +16,12 @@
             outline: none;
         }
     }
+    .CodeMirror {
+        border: 1px solid #eee;
+        height: auto;
+        .CodeMirror-scroll {
+            min-height: 100vh;
+        }
+    }
+
 }
