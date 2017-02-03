@@ -54,13 +54,13 @@ class AppComponent extends React.Component {
   constructor(props) {
     super(props);
     let MDStr = localStorage.getItem('MDStr') || '';
+    this.state = {
+      MDStr
+    };
     this.scrollTopRate = undefined; // 这里也有,是为了在scroll事件回调里面修改这个而不直接setState
     this.lastScrolled = undefined;
     this.hadRequestedAF = false; // 是否已经调用了requestAnimationFrame
     this.sycnScrollElements = [];
-    this.state = {
-      MDStr
-    };
   }
 
 

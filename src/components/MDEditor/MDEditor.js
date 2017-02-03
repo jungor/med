@@ -35,6 +35,7 @@ export default class MDEditor extends React.Component {
     });
     Ps.initialize(this.rootDOM, {theme: 'med'});
     this.cmEditor.on('change', this.updateMDStr);
+    this.cmEditor.on('redraw', this.updatePs);
     window.addEventListener('resize', this.updateHeight);
     this.props.addSyncScrollElement(this.rootDOM);
   }
@@ -42,8 +43,13 @@ export default class MDEditor extends React.Component {
   componentWillUnmount() {
     Ps.destroy(this.rootDOM);
     this.off('change', this.updateMDStr);
+    this.off('redraw', this.updatePs);
     window.removeEventListener('resize', this.updateHeight);
     this.props.removeSyncScrollElement(this.rootDOM);
+  }
+
+  componentDidUpdate() {
+    Ps.update(this.rootDOM);
   }
 
   /**
@@ -58,34 +64,13 @@ export default class MDEditor extends React.Component {
   updateMDStr = (instance, changeObj) => {
     let newValue = this.cmEditor.getDoc().getValue();
     this.props.updateMDStr(newValue);
+  };
+
+  updatePs = () => {
     if (this.rootDOM) {
       Ps.update(this.rootDOM);
     }
   };
-
-  // render() {
-  //   return (
-  //     <div
-  //       ref={(rootDOM)=>{this.rootDOM = rootDOM;}}
-  //       id={this.props.name}
-  //       onScroll={this.props.onScroll.bind(undefined, this.rootDOM)}
-  //     >
-  //       <textarea
-  //         ref={(editor)=>{this.editor = editor;}}
-  //         value={this.props.value}
-  //         onChange={(e)=>{
-  //           if (this.editor) {
-  //             this.updateHeight(e);
-  //           }
-  //           if (this.rootDOM) {
-  //             Ps.update(this.rootDOM);
-  //           }
-  //           this.props.updateMDStr(e.target.value);
-  //         }}
-  //       />
-  //     </div>
-  //   );
-  // }
 
   render() {
     return (

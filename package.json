@@ -74,10 +74,12 @@
   "dependencies": {
     "codemirror": "^5.23.0",
     "cross-env": "^3.1.0",
+    "gfm.css": "^1.1.1",
     "highlight.js": "^9.9.0",
     "marked": "^0.3.6",
     "mathjax": "^2.7.0",
     "perfect-scrollbar": "^0.6.16",
+    "pygmentize-bundled": "^2.3.0",
     "react": "^15.0.1",
     "react-ace": "^4.1.0",
     "react-dom": "^15.0.1",
