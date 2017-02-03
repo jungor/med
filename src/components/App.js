@@ -2,7 +2,6 @@ import React from 'react';
 import MDEditor from './MDEditor';
 import MDPreviewer from './MDPreviewer';
 import Ps from 'perfect-scrollbar';
-// import { autoBindThis } from '../utils';
 import './App.scss';
 
 /**

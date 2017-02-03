@@ -32,6 +32,18 @@ class MDPreviewer extends React.Component {
     this.props.removeSyncScrollElement(this.rootDOM);
   }
 
+  componentDidUpdate() {
+    this.typesetMathjax();
+  }
+
+  /**
+   * 重新渲染数学公式
+   */
+  typesetMathjax = () => {
+    if (!this.rootDOM) return;
+    MathJax.Hub.Queue(["Typeset",MathJax.Hub, this.rootDOM]);
+  };
+
   render() {
     return (
       <div
