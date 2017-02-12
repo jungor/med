@@ -6,22 +6,33 @@
     left: 50%;
     top: 0;
     box-sizing: border-box;
-    padding: 0 1em;
+    padding: 1em;
     width: 50% !important;
     height: 100vh !important;
     overflow: auto;
-}
 
-// todolist的checkbox样式
-.markdown-body {
-    /* lists */
-    li.todo-list-item {
-        list-style: none;
-        i {
-            width: 2em;
-            margin-left: -2em;
-            text-align: right;
-            padding-right: 6px;
+    // todolist的checkbox样式
+    .markdown-body {
+        /* lists */
+        li.todo-list-item {
+            list-style: none;
+            i {
+                width: 2em;
+                margin-left: -2em;
+                text-align: right;
+                padding-right: 6px;
+            }
+        }
+    }
+
+    .toc {
+        @for $i from 1 through 6 {
+            .level#{$i} {
+                display: block;
+                margin-bottom: 5px;
+                margin-left: 1em * $i;
+            }
         }
     }
 }
+

@@ -4,11 +4,76 @@
 import React from 'react';
 import marked from 'marked';
 import Ps from 'perfect-scrollbar';
-import classnames from 'classnames';
 import './MDPreviewer.scss';
 
 const { PropTypes } = React;
 const renderer = new marked.Renderer();
+
+class TOCGenerator {
+  constructor() {
+    this.headList = [];
+  }
+  addHead = (text, level, raw) => {
+    this.headList.push({text, level, raw});
+  };
+  reset = () => {
+    this.headList = [];
+  };
+  genToc = () => {
+    // TODO 具体算法不详，用着自己的逻辑
+    console.log(this.headList);
+    let out = '<div class="toc">';
+    // let curLevel = 0;
+    // for (let h of this.headList) {
+    //   if (h.level > curLevel) {
+    //     out += `<ul><li>${h.text}</li>>`;
+    //   } else if (h.level == curLevel) {
+    //     out += `<li>${h.text}</li>`;
+    //   } else {
+    //     let diff = curLevel - h.level;
+    //     while (diff--) {
+    //       out += '</ul>';
+    //     }
+    //     out += `<ul><li>${h.text}</li>>`;
+    //   }
+    //   curLevel = h.level;
+    // }
+    for (let h of this.headList) {
+      let href = '#' + h.raw.toLowerCase().replace(/[^\w]+/g, '-');
+      out += `<p class=${'level'+h.level}><a href=${href}>${h.text}</a></p>`;
+    }
+    out += '</div>';
+    console.log(out);
+    return out;
+  };
+}
+
+let tocGen = new TOCGenerator();
+
+/**
+ * 重写基类的listitem生成方法。用于生成todolist
+ * @param code
+ * @param lang
+ * @param escaped
+ * @return {string}
+ */
+renderer.listitem = function (text, level) {
+  const checkedTaskItemPtn = /^\[[vx]] +/;
+  const uncheckedTaskItemPtn = /^\[[ ]] +/;
+  let isCheckedTaskItem = checkedTaskItemPtn.test(text);
+  let isUncheckedTaskItem = uncheckedTaskItemPtn.test(text);
+  if (isCheckedTaskItem) text = text.replace(checkedTaskItemPtn, '<i class="fa fa-check-square" aria-hidden="true"></i>')+'\n';
+  if (isUncheckedTaskItem) text = text.replace(uncheckedTaskItemPtn, '<i class="fa fa-square-o" aria-hidden="true"></i>')+'\n';
+  let cls = (isCheckedTaskItem || isUncheckedTaskItem) ? ' class="todo-list-item"' : '';
+  return '<li'+ cls + '>' + text + '</li>\n';
+};
+
+let sup = renderer.heading;
+renderer.heading = function (text, level, raw) {
+  tocGen.addHead(text, level, raw);
+  return sup.call(this, text, level, raw);
+};
+
 const markedOptions = {
   renderer,
   highlight: function (code) {
@@ -17,26 +82,6 @@ const markedOptions = {
 };
 
 marked.setOptions(markedOptions);
-
-const checkedTaskItemPtn = /^\[[vx]] +/;
-const uncheckedTaskItemPtn = /^\[[ ]] +/;
-
-
-/**
- * 重写基类的code生成方法。将代码块包在一个ol里，以显示行号
- * @param code
- * @param lang
- * @param escaped
- * @return {string}
- */
-renderer.listitem = function (text, level) {
-  let isCheckedTaskItem = checkedTaskItemPtn.test(text);
-  let isUncheckedTaskItem = uncheckedTaskItemPtn.test(text);
-  if (isCheckedTaskItem) text = text.replace(checkedTaskItemPtn, '<i class="fa fa-check-square" aria-hidden="true"></i>')+'\n';
-  if (isUncheckedTaskItem) text = text.replace(uncheckedTaskItemPtn, '<i class="fa fa-square-o" aria-hidden="true"></i>')+'\n';
-  let cls = (isCheckedTaskItem || isUncheckedTaskItem) ? ' class="todo-list-item"' : '';
-  return '<li'+ cls + '>' + text + '</li>\n';
-};
 
 class MDPreviewer extends React.Component {
 
@@ -67,14 +112,19 @@ class MDPreviewer extends React.Component {
     MathJax.Hub.Queue(["Typeset",MathJax.Hub, this.rootDOM]);
   };
 
-  render() {
+  genHTML = () => {
+    tocGen.reset();
+    let html = marked(this.props.MDStr, {renderer});
+    return tocGen.genToc()+html;
+  };
 
+  render() {
     return (
       <div
         className="markdown-body"
         ref={(rootDOM)=>{this.rootDOM = rootDOM;}}
         id={this.props.name}
-        dangerouslySetInnerHTML={{__html: marked(this.props.MDStr, {renderer})}}
+        dangerouslySetInnerHTML={{__html: this.genHTML()}}
         onScroll={this.props.onScroll.bind(undefined, this.rootDOM)}
       />
     );
